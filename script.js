@@ -1,17 +1,17 @@
 document.getElementById('filterButton').addEventListener('click', () => {
     const file = document.getElementById('kmlFile').files[0];
-    const regioneCode = document.getElementById('regioneCode').value;
+    const regioneCode = "17"; // Codice regione Basilicata
 
-    if (file && regioneCode) {
+    if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const kml = event.target.result;
             const filteredKml = filterKml(kml, regioneCode);
-            downloadKml(filteredKml, `comuni_regione_${regioneCode}.kml`);
+            downloadKml(filteredKml, `comuni_basilicata.kml`);
         };
         reader.readAsText(file);
     } else {
-        alert('Seleziona un file KML e inserisci un codice regione.');
+        alert('Seleziona un file KML.');
     }
 });
 
@@ -22,9 +22,12 @@ function filterKml(kml, regioneCode) {
     const filteredPlacemarks = [];
 
     for (let i = 0; i < placemarks.length; i++) {
-        const description = placemarks[i].getElementsByTagName('description')[0]?.textContent;
-        if (description && description.includes(`CODREG=${regioneCode}`)) {
-            filteredPlacemarks.push(placemarks[i]);
+        const simpleData = placemarks[i].getElementsByTagName('SimpleData');
+        for (let j = 0; j < simpleData.length; j++) {
+            if (simpleData[j].getAttribute('name') === 'cod_reg' && simpleData[j].textContent === regioneCode) {
+                filteredPlacemarks.push(placemarks[i]);
+                break; // Non c'è bisogno di cercare altri SimpleData in questo Placemark
+            }
         }
     }
 
