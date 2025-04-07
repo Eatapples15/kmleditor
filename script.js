@@ -1,9 +1,3 @@
-const map = L.map('map').setView([42, 12], 6);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-}).addTo(map);
-
 document.getElementById('filterButton').addEventListener('click', () => {
     const file = document.getElementById('kmlFile').files[0];
     const regioneCode = document.getElementById('regioneCode').value;
@@ -13,7 +7,7 @@ document.getElementById('filterButton').addEventListener('click', () => {
         reader.onload = (event) => {
             const kml = event.target.result;
             const filteredKml = filterKml(kml, regioneCode);
-            displayKml(filteredKml);
+            downloadKml(filteredKml, `comuni_regione_${regioneCode}.kml`);
         };
         reader.readAsText(file);
     } else {
@@ -47,7 +41,12 @@ function createKml(placemarks) {
     return kml;
 }
 
-function displayKml(kml) {
-    const geojson = toGeoJSON.kml(new DOMParser().parseFromString(kml, 'text/xml'));
-    L.geoJSON(geojson).addTo(map);
+function downloadKml(kml, filename) {
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent(kml));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }
