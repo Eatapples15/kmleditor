@@ -45,11 +45,14 @@ function createKml(placemarks) {
 }
 
 function downloadKml(kml, filename) {
+    const blob = new Blob([kml], { type: 'text/xml' });
+    const url = URL.createObjectURL(blob);
     const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/xml;charset=utf-8,' + encodeURIComponent(kml));
+    element.setAttribute('href', url);
     element.setAttribute('download', filename);
     element.style.display = 'none';
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
+    URL.revokeObjectURL(url); // Libera la memoria
 }
