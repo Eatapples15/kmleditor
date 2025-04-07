@@ -1,13 +1,11 @@
-document.getElementById('filterButton').addEventListener('click', () => {
+document.getElementById('extractButton').addEventListener('click', () => {
     const file = document.getElementById('kmlFile').files[0];
-    const regioneCode = "17"; // Codice regione Basilicata
 
     if (file) {
         const reader = new FileReader();
         reader.onload = (event) => {
             const kml = event.target.result;
-            const filteredKml = filterKml(kml, regioneCode);
-            downloadKml(filteredKml, `comuni_basilicata.kml`);
+            extractComuni(kml);
         };
         reader.readAsText(file);
     } else {
@@ -15,44 +13,32 @@ document.getElementById('filterButton').addEventListener('click', () => {
     }
 });
 
-function filterKml(kml, regioneCode) {
+function extractComuni(kml) {
     const parser = new DOMParser();
     const xml = parser.parseFromString(kml, 'text/xml');
-    const placemarks = xml.getElementsByTagName('Placemark');
-    const filteredPlacemarks = [];
+    const schemaDataList = xml.getElementsByTagName('SchemaData');
+    const comuniList = document.getElementById('comuniList');
+    comuniList.innerHTML = ''; // Pulisci la lista precedente
 
-    for (let i = 0; i < placemarks.length; i++) {
-        const simpleData = placemarks[i].getElementsByTagName('SimpleData');
-        for (let j = 0; j < simpleData.length; j++) {
-            if (simpleData[j].getAttribute('name') === 'cod_reg' && simpleData[j].textContent === regioneCode) {
-                filteredPlacemarks.push(placemarks[i]);
-                break; // Non c'è bisogno di cercare altri SimpleData in questo Placemark
+    for (let i = 0; i < schemaDataList.length; i++) {
+        const schemaData = schemaDataList[i];
+        const simpleDataList = schemaData.getElementsByTagName('SimpleData');
+        let comune = '';
+        let proCom = '';
+
+        for (let j = 0; j < simpleDataList.length; j++) {
+            const simpleData = simpleDataList[j];
+            if (simpleData.getAttribute('name') === 'comune') {
+                comune = simpleData.textContent;
+            } else if (simpleData.getAttribute('name') === 'pro_com') {
+                proCom = simpleData.textContent;
             }
         }
+
+        if (comune && proCom) {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${comune} (${proCom})`;
+            comuniList.appendChild(listItem);
+        }
     }
-
-    const filteredKml = createKml(filteredPlacemarks);
-    return filteredKml;
-}
-
-function createKml(placemarks) {
-    let kml = '<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2">\n<Document>';
-    placemarks.forEach(placemark => {
-        kml += new XMLSerializer().serializeToString(placemark);
-    });
-    kml += '</Document>\n</kml>';
-    return kml;
-}
-
-function downloadKml(kml, filename) {
-    const blob = new Blob([kml], { type: 'text/xml' });
-    const url = URL.createObjectURL(blob);
-    const element = document.createElement('a');
-    element.setAttribute('href', url);
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    URL.revokeObjectURL(url); // Libera la memoria
 }
