@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visualizzatore KML</title>
+    <style>
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.1/togeojson.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xmldom/0.6.0/xmldom.min.js"></script>
+</head>
+<body>
+    <h1>Visualizzatore KML</h1>
+    <input type="file" id="kmlFile" accept=".kml">
+    <input type="text" id="regioneCode" placeholder="Codice Regione">
+    <button id="filterButton">Filtra</button>
+    <div id="map"></div>
+    <script src="script.js"></script>
+</body>
+</html>
